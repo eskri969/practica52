@@ -187,3 +187,49 @@ exports.check = function (req, res, next) {
         answer: answer
     });
 };
+
+// GET /quizzes/:quizId/random_play
+exports.random_play = function (req, res, next) {
+
+    var answer = req.query.answer || "";
+
+    if(req.session.score==undefined){
+        req.session.score=0;
+    }
+
+    models.Quiz.findById(1)
+        .then(function (quiz) {
+            if(quiz){
+            res.render('quizzes/random_play', {
+                quiz: quiz,
+                answer: answer,
+                score: req.session.score
+            });
+        } else {
+                throw new Error('No existe esta mierda')
+            }
+        })
+        .catch(function (error) {
+            next(error);
+        });
+};
+
+// GET /quizzes/:quizId/randomcheck
+exports.randomcheck = function (req, res, next) {
+
+    var answer = req.query.answer || "";
+
+    var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
+    if(result) {
+        req.session.score++;
+    }
+    else{
+        req.session.quizzes=undefined;
+    }
+    res.render('quizzes/random_result', {
+        quiz: req.quiz,
+        result: result,
+        answer: answer,
+        score: req.session.score
+    });
+};
